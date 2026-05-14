@@ -117,10 +117,6 @@ APFEL_API_KEY=dummy zed
 
 Open the agent panel (`Cmd+?`), pick `Apfel (apple on-device)`, send a prompt. Zed POSTs to `/v1/chat/completions` on apfel.
 
-![Zed agent panel powered by apfel](../screenshots/zed-integration.png)
-
-*Zed 0.233.x. Left: agent thread answering through apfel. Right: open Python file. Bottom: `Apfel (apple on-device)` selected. Stream traces from `apfel --serve` confirm `POST /v1/chat/completions/stream 200` per turn.*
-
 ---
 
 ## Visual Studio Code + Continue
