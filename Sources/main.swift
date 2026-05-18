@@ -40,6 +40,15 @@ func exitCode(for error: ApfelError) -> Int32 {
 
 apfel_install_sigint_exit_handler(isatty(STDOUT_FILENO) != 0 ? 1 : 0)
 
+// True when stdin is a FIFO/pipe (`command | apfel`) vs a regular file
+// redirect (`apfel < file`). We only suggest `2>&1` for the pipe case;
+// regular files don't need that advice.
+func stdinIsPipe() -> Bool {
+    var st = stat()
+    guard fstat(STDIN_FILENO, &st) == 0 else { return false }
+    return (st.st_mode & S_IFMT) == S_IFIFO
+}
+
 // MARK: - Argument Parsing
 
 let rawArgs = Array(CommandLine.arguments.dropFirst())
@@ -63,6 +72,9 @@ if rawArgs.isEmpty {
                 printError("\(classified.cliLabel) \(classified.openAIMessage)")
                 exit(exitCode(for: classified))
             }
+        }
+        if stdinIsPipe() {
+            printStderr("\(styled("apfel:", .yellow)) piped input was empty - if the command prints to stderr, try: command 2>&1 | apfel")
         }
     }
     printUsage()
@@ -116,6 +128,8 @@ if parsed.mode.acceptsStdinInput && isatty(STDIN_FILENO) == 0 {
         } else {
             fileContents.append(stdinContent)
         }
+    } else if !prompt.isEmpty && !quietMode && stdinIsPipe() {
+        printStderr("\(styled("apfel:", .yellow)) piped input was empty - if the command prints to stderr, try: command 2>&1 | apfel")
     }
 }
 

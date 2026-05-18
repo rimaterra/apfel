@@ -698,6 +698,52 @@ def test_update_non_interactive():
     assert result.returncode == 0
 
 
+# --- Empty-pipe stderr hint tests (GH-152) ---
+
+
+def test_empty_pipe_no_args_shows_stderr_hint():
+    """When stdin is a pipe but empty and no args given, hint about stderr redirection (#152)."""
+    result = run_cli([], input_text="", timeout=10)
+    assert result.returncode == 2
+    assert "piped input was empty" in result.stderr
+    assert "2>&1" in result.stderr
+
+
+def test_empty_pipe_with_prompt_shows_stderr_hint():
+    """When stdin is a pipe but empty with a prompt, hint about stderr redirection (#152)."""
+    result = run_cli(["What went wrong?"], input_text="", timeout=30)
+    # Hint appears regardless of whether model is available.
+    assert "piped input was empty" in result.stderr
+    assert "2>&1" in result.stderr
+
+
+def test_empty_pipe_quiet_suppresses_hint():
+    """--quiet should suppress the empty-pipe hint (#152)."""
+    result = run_cli(["-q", "What went wrong?"], input_text="", timeout=30)
+    assert "piped input was empty" not in result.stderr
+
+
+def test_empty_file_redirect_no_hint(tmp_path):
+    """Empty regular-file redirect (`apfel "q" < empty.txt`) should NOT emit the
+    pipe hint - the hint is only useful for `command 2>&1 | apfel` (#152)."""
+    empty_file = tmp_path / "empty.txt"
+    empty_file.write_text("")
+    merged_env = os.environ.copy()
+    for key in ["NO_COLOR", "APFEL_SYSTEM_PROMPT", "APFEL_HOST", "APFEL_PORT",
+                "APFEL_TEMPERATURE", "APFEL_MAX_TOKENS"]:
+        merged_env.pop(key, None)
+    with open(empty_file, "rb") as fh:
+        result = subprocess.run(
+            [str(BINARY), "What went wrong?"],
+            stdin=fh,
+            capture_output=True,
+            text=True,
+            env=merged_env,
+            timeout=30,
+        )
+    assert "piped input was empty" not in result.stderr
+
+
 # --- Release info tests ---
 
 
