@@ -175,17 +175,18 @@ extension CLIArguments {
 
         // Environment variable defaults (CLI flags override these).
         result.systemPrompt = env["APFEL_SYSTEM_PROMPT"]
-        result.serverPort = Int(env["APFEL_PORT"] ?? "") ?? 11434
+        result.serverPort = Int(env["APFEL_PORT"] ?? "")
+            .flatMap { (1...65535).contains($0) ? $0 : nil } ?? 11434
         result.serverHost = env["APFEL_HOST"] ?? "127.0.0.1"
         result.serverToken = env["APFEL_TOKEN"]
         result.mcpServerPaths = env["APFEL_MCP"].map { parseMCPServerPaths($0) } ?? []
         result.mcpTimeoutSeconds = Int(env["APFEL_MCP_TIMEOUT"] ?? "")
             .flatMap { $0 > 0 ? min($0, 300) : nil } ?? 5
         result.mcpBearerToken = env["APFEL_MCP_TOKEN"].flatMap { $0.isEmpty ? nil : $0 }
-        result.temperature = Double(env["APFEL_TEMPERATURE"] ?? "")
+        result.temperature = Double(env["APFEL_TEMPERATURE"] ?? "").flatMap { $0 >= 0 ? $0 : nil }
         result.maxTokens = Int(env["APFEL_MAX_TOKENS"] ?? "").flatMap { $0 > 0 ? $0 : nil }
         result.contextStrategy = env["APFEL_CONTEXT_STRATEGY"].flatMap { ContextStrategy(rawValue: $0) }
-        result.contextMaxTurns = env["APFEL_CONTEXT_MAX_TURNS"].flatMap { Int($0) }
+        result.contextMaxTurns = env["APFEL_CONTEXT_MAX_TURNS"].flatMap { Int($0) }.flatMap { $0 > 0 ? $0 : nil }
         result.contextOutputReserve = env["APFEL_CONTEXT_OUTPUT_RESERVE"]
             .flatMap { Int($0) }.flatMap { $0 > 0 ? $0 : nil }
 
@@ -390,7 +391,13 @@ extension CLIArguments {
             case "--retry":
                 result.retryEnabled = true
                 // Optional argument: --retry or --retry N (positive).
-                if i + 1 < args.count, let n = Int(args[i + 1]), n > 0 {
+                // A next token that parses as an integer is treated as the
+                // count; if it is non-positive, reject it like other numeric
+                // flags rather than silently ignoring it.
+                if i + 1 < args.count, let n = Int(args[i + 1]) {
+                    guard n > 0 else {
+                        throw CLIErrors.requires("--retry", "a positive number")
+                    }
                     result.retryCount = n
                     i += 1
                 }
