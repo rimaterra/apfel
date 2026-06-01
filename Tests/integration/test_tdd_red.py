@@ -255,12 +255,19 @@ def test_179_streaming_refusal_counts_pre_refusal_tokens():
 def test_182_streaming_retry_prints_output_once():
     """#182: a retryable error mid-stream must not reprint already-streamed output.
 
-    Not externally triggerable: a client cannot force a .rateLimited /
-    .concurrentRequest error mid-stream. collectStream lives in the
-    FoundationModels-coupled executable target and cannot be unit-tested without
-    an injectable stream/sink seam (fix-phase). RED until then.
+    GREEN. The fix added the injectable seam this placeholder asked for:
+    `StreamPrintSink` (Sources/Core/Chat/StreamRetryPolicy.swift) decouples the
+    stdout side-effect from the retried streaming operation. One sink instance is
+    shared across all `withRetry` attempts in `processPrompt`; it tracks a
+    high-water mark of emitted characters and prints only the suffix beyond it,
+    so a retry that re-streams the already-printed prefix emits nothing.
+
+    The deterministic coverage lives in the pure-Swift unit suite, which can feed
+    the sink a scripted failed-then-retried cumulative-snapshot sequence without
+    the live model — see Tests/apfelTests/StreamPrintSinkTests.swift
+    (runStreamPrintSinkTests), in particular
+    "feed: a retry that re-streams the printed prefix does NOT reprint it (#182)".
+    A mid-stream .rateLimited/.concurrentRequest error still cannot be forced from
+    a client, so there is nothing left to assert at the wire boundary here.
     """
-    pytest.fail(
-        "#182 RED placeholder: mid-stream retry duplicate-stdout is not externally "
-        "triggerable; deterministic test needs the fix to add an injectable "
-        "stream/sink seam. Tracked on issue #182.")
+    pass

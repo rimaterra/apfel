@@ -99,6 +99,7 @@ suite("TraceBufferTests") { runTraceBufferTests() }
 suite("StreamTaskBoxTests") { runStreamTaskBoxTests() }
 suite("ManPageTests") { runManPageTests() }
 suite("StreamCleanupTests") { runStreamCleanupTests() }
+suite("StreamPrintSinkTests") { runStreamPrintSinkTests() }
 suite("BufferedLineReaderConcurrencyTests") { runBufferedLineReaderConcurrencyTests() }
 suite("DebugFlagBaselineTests") { runDebugFlagBaselineTests() }
 suite("ApfelErrorMessageTests") { runApfelErrorMessageTests() }

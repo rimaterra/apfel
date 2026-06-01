@@ -244,21 +244,18 @@ func processPrompt(
 
     var content: String
     var finishReason: FinishReason = .stop
-    if stream {
-        let outcome = try await withRetry(maxRetries: retryMax) {
-            try await collectStream(session, prompt: prompt, printDelta: printDelta && !hasMCPTools, options: genOpts)
-        }
-        content = outcome.content
-        finishReason = outcome.finishReason
-    } else {
-        // Route non-streaming through the streaming path too: same overflow
-        // semantics on both paths, no second code path to maintain.
-        let outcome = try await withRetry(maxRetries: retryMax) {
-            try await collectStream(session, prompt: prompt, printDelta: false, options: genOpts)
-        }
-        content = outcome.content
-        finishReason = outcome.finishReason
+    // Print deltas only on the live streaming path with no MCP tools (tool calls
+    // re-prompt and stream the final answer separately). Share ONE print sink
+    // across all retry attempts: a retryable mid-stream error re-runs the stream
+    // from an empty snapshot, and the sink suppresses re-emitting the already-
+    // printed prefix so output appears exactly once, live, in order (#182).
+    let shouldPrint = stream && printDelta && !hasMCPTools
+    let printSink = shouldPrint ? StreamPrintSink() : nil
+    let outcome = try await withRetry(maxRetries: retryMax) {
+        try await collectStream(session, prompt: prompt, sink: printSink, options: genOpts)
     }
+    content = outcome.content
+    finishReason = outcome.finishReason
 
     debugLog("response", "length=\(content.count) finish=\(finishReason)")
 
@@ -492,7 +489,7 @@ private func appendExecutedToolResults(
 func collectStream(
     _ session: LanguageModelSession,
     prompt: String,
-    printDelta: Bool,
+    sink: StreamPrintSink? = nil,
     options: GenerationOptions = GenerationOptions()
 ) async throws -> StreamOutcome {
     let stream = session.streamResponse(to: prompt, options: options)
@@ -500,13 +497,12 @@ func collectStream(
     do {
         for try await snapshot in stream {
             let content = snapshot.content
-            if content.count > prev.count {
-                let idx = content.index(content.startIndex, offsetBy: prev.count)
-                let delta = String(content[idx...])
-                if printDelta {
-                    print(delta, terminator: "")
-                    fflush(stdout)
-                }
+            // Feed the cumulative snapshot to the (optional) print sink. The sink
+            // tracks a high-water mark across retries and emits only the suffix
+            // beyond what it has already printed, so a retried re-run never
+            // reprints the already-streamed prefix (#182).
+            if let sink {
+                await sink.feed(cumulative: content)
             }
             prev = content
         }

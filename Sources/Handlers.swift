@@ -337,7 +337,7 @@ private func nonStreamingResponse(
         // Route non-streaming through collectStream so output-side context
         // overflow surfaces as a graceful length-finish on this path too.
         outcome = try await withRetry(maxRetries: nsRetryMax) {
-            try await collectStream(session, prompt: prompt, printDelta: false, options: genOpts)
+            try await collectStream(session, prompt: prompt, options: genOpts)
         }
     } catch {
         let classified = ApfelError.classify(error)
