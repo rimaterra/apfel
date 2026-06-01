@@ -10,7 +10,7 @@ These assert the CORRECT behaviour described in each GitHub issue. The fix that
 makes them green is a SEPARATE follow-up task — do not implement here.
 
 Covered (real assertions, red now):
-  #167 json_schema, #169 prewarm (model-free), #170 apfel tag,
+  #167 json_schema, #169 prewarm (model-free),
   #171 streamed structured output, #176 tool-def token undercount
 
 Covered (Tier-3 loud placeholders — failure condition not externally
@@ -28,7 +28,6 @@ Run: python3 -m pytest Tests/integration/test_tdd_red.py -v
 
 import json
 import pathlib
-import subprocess
 
 import httpx
 import pytest
@@ -144,25 +143,6 @@ def test_168_top_p_request_succeeds():
         "top_p": 0.9,
     })
     assert resp.status_code == 200, f"top_p request should succeed, got {resp.status_code}: {resp.text}"
-
-
-# ---------------------------------------------------------------------------
-# #170 apfel tag — contentTagging subcommand
-# ---------------------------------------------------------------------------
-
-def test_170_tag_subcommand_returns_tags_json():
-    """`apfel tag -o json` must emit a JSON object with a 'tags' array (#170).
-
-    Today there is no `tag` subcommand -> RED.
-    """
-    proc = subprocess.run(
-        [str(BINARY), "tag", "-o", "json"],
-        input="This local-first CLI tool is fast and private.",
-        text=True, capture_output=True, timeout=TIMEOUT,
-    )
-    assert proc.returncode == 0, f"`apfel tag` should succeed, got rc={proc.returncode}, stderr={proc.stderr!r}"
-    payload = json.loads(proc.stdout)
-    assert "tags" in payload and isinstance(payload["tags"], list), "tag output must include a 'tags' array"
 
 
 # ---------------------------------------------------------------------------

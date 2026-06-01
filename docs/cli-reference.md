@@ -1,6 +1,6 @@
 # CLI Reference
 
-`apfel` runs as a single prompt, `--stream`, `--chat`, `--serve`, or the `tag` subcommand. This page is the full flag, exit-code, and environment reference for the installed CLI.
+`apfel` has four primary modes: single prompt, `--stream`, `--chat`, and `--serve`. This page is the full flag, exit-code, and environment reference for the installed CLI.
 
 ## Modes
 
@@ -10,7 +10,6 @@ MODES
   apfel --stream <prompt>                 Stream response tokens
   apfel --chat                            Interactive conversation
   apfel --serve                           Start OpenAI-compatible server
-  apfel tag                               Classify piped stdin text into tags (contentTagging model)
   apfel --benchmark                       Run internal performance benchmarks
 
 INPUT

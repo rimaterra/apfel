@@ -7,6 +7,10 @@ and this project adheres to [https://semver.org/](https://semver.org/).
 
 ## [Unreleased]
 
+### Removed
+
+- Removed the `apfel tag` subcommand. It was feature creep - apfel is the UNIX tool (`apfel "prompt"`) and the OpenAI-compatible server (`apfel --serve`); a content-tagging command is a different tool. On-device content tagging now lives in the dedicated sister tool [apfel-tag](https://github.com/Arthur-Ficial/apfel-tag): `brew install Arthur-Ficial/tap/apfel-tag`.
+
 ### Added
 
 - `ApfelCore` is now exposed as a public Swift Package library product.

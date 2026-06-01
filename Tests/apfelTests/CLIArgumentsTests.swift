@@ -75,28 +75,10 @@ func runCLIArgumentsTests() {
         try assertEqual(args.mode, .update)
     }
 
-    test("tag subcommand sets tag mode") {
+    test("tag is no longer a subcommand - treated as a normal prompt (moved to apfel-tag)") {
         let args = try CLIArguments.parse(["tag"])
-        try assertEqual(args.mode, .tag)
-    }
-
-    test("tag subcommand accepts -o json after it") {
-        let args = try CLIArguments.parse(["tag", "-o", "json"])
-        try assertEqual(args.mode, .tag)
-        try assertEqual(args.outputFormat, .json)
-    }
-
-    test("tag is only a subcommand as the first arg, not inside a prompt") {
-        let args = try CLIArguments.parse(["please", "tag", "this"])
         try assertEqual(args.mode, .single)
-        try assertEqual(args.prompt, "please tag this")
-    }
-
-    test("tag mode does not use the shared stdin-prompt path") {
-        // .tag reads stdin itself (classified, not appended to a prompt), so it
-        // is intentionally excluded from acceptsStdinInput.
-        let args = try CLIArguments.parse(["tag"])
-        try assertTrue(!args.mode.acceptsStdinInput)
+        try assertEqual(args.prompt, "tag")
     }
 
     // ========================================================================

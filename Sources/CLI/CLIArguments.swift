@@ -22,7 +22,6 @@ public struct CLIArguments: Sendable, Equatable {
         case benchmark
         case modelInfo = "model-info"
         case update
-        case tag
         case help
         case version
         case release
@@ -30,11 +29,6 @@ public struct CLIArguments: Sendable, Equatable {
         /// Whether this mode supports reading piped stdin as prompt input.
         /// Modes that accept a user prompt from the command line also accept
         /// it (or a prefix to it) from stdin.
-        ///
-        /// `.tag` reads stdin too, but the executable handles that read itself
-        /// (the text is classified, not appended to a prompt), so it is not
-        /// listed here -- this flag drives the shared prompt-assembly path in
-        /// main.swift that `.tag` deliberately bypasses.
         public var acceptsStdinInput: Bool {
             switch self {
             case .single, .stream: return true
@@ -208,15 +202,7 @@ extension CLIArguments {
         // participate in conflict detection.
         var context = ValidationContext()
 
-        // Positional subcommands: recognized only as the first argument so they
-        // never collide with prompt text (e.g. `apfel "tag this for me"` still
-        // sends a prompt). `tag` classifies stdin via the contentTagging
-        // specialized model; remaining args are parsed as normal flags.
         var i = 0
-        if args.first == "tag" {
-            result.mode = .tag
-            i = 1
-        }
         while i < args.count {
             switch args[i] {
 

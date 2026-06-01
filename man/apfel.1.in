@@ -26,10 +26,6 @@ apfel \- Apple Intelligence from the command line
 .RI [ server-options ]
 .br
 .B apfel
-.B tag
-.RI [ options ]
-.br
-.B apfel
 .B \-\-benchmark
 .br
 .B apfel
@@ -147,12 +143,6 @@ retries when the flag is given without a value.
 .TP
 .B \-\-model-info
 Print the active model's capabilities and exit.
-.TP
-.B tag
-Read text from standard input and classify it into tags using the
-on-device content-tagging model. Honors
-.BR \-o ", " \-\-output
-for plain or JSON output.
 .TP
 .B \-\-benchmark
 Run the internal performance benchmark suite.

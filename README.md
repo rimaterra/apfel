@@ -85,13 +85,7 @@ apfel --system-file persona.txt "Explain TCP/IP"
 
 # Quiet mode for shell scripts
 result=$(apfel -q "Capital of France? One word.")
-
-# Classify piped text into tags (on-device content-tagging model)
-echo "The headphones sound amazing and battery lasts all day." | apfel tag
-echo "Kubernetes pods keep crashing under load." | apfel tag -o json | jq -r '.tags[]'
 ```
-
-Full `apfel tag` reference: [docs/apfel-tag.md](docs/apfel-tag.md).
 
 ### OpenAI-compatible server
 

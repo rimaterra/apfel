@@ -230,9 +230,6 @@ do {
     case .update:
         performUpdate()
 
-    case .tag:
-        try await tagStdin(options: sessionOpts)
-
     case .modelInfo:
         await printModelInfo()
 
