@@ -107,6 +107,7 @@ suite("OpenAIWireFormatTests") { runOpenAIWireFormatTests() }
 suite("ApfelCorePublicAPIUsageTests") { runApfelCorePublicAPIUsageTests() }
 suite("InstallMethodTests") { runInstallMethodTests() }
 suite("SamplingDecisionTests") { runSamplingDecisionTests() }
+suite("DemoInstallerTests") { runDemoInstallerTests() }
 suite("RedTDDTests") { runRedTDDTests() }
 
 // MARK: - Summary

@@ -129,7 +129,13 @@ Ctrl-C exits. Context is trimmed automatically ([docs/context-strategies.md](doc
 
 ## Demos
 
-Shell scripts in [`demo/`](./demo/):
+Real-world shell scripts that wrap `apfel`. They are bundled inside the binary, so you can write them out wherever you installed apfel from (homebrew-core, the tap, or source) - no repo clone needed:
+
+```bash
+apfel demos ./apfel-demos
+```
+
+That writes every demo (executable) into `./apfel-demos`, plus a `README.md` describing each. Re-run after `brew upgrade apfel` to refresh them. The same scripts also live in [`demo/`](./demo/) in this repo.
 
 **[cmd](./demo/cmd)** - natural language to shell command:
 

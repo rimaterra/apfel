@@ -7,6 +7,18 @@ and this project adheres to [https://semver.org/](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `apfel demos [dir]` writes the bundled demo scripts (cmd, explain, oneliner, wtd, naming, port, gitsum, mac-narrator) to a directory. The demos are embedded in the binary, so it behaves identically on homebrew-core, the tap, and source builds (#204).
+
+### Changed
+
+- CHANGELOG.md is now backfilled through every release and kept current automatically by the release workflow (#201).
+
+### Fixed
+
+- Tap formula keeps its macOS-only guard: silence the `Homebrew/OSDependsOn` style warning without dropping `depends_on :macos`, which is the only hard Linux block for the prebuilt-binary tap (#203).
+
 ## [1.5.5] - 2026-06-09
 
 ### Fixed
