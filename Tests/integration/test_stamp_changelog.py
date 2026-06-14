@@ -11,6 +11,7 @@ model, no network) and assert the release script is actually wired to use it.
 """
 
 import pathlib
+import re
 import subprocess
 import tempfile
 
@@ -105,10 +106,30 @@ def test_publish_release_is_wired_to_stamp_and_commit_changelog():
     )
 
 
-def test_repo_changelog_is_current_through_latest_release():
-    """The shipped CHANGELOG.md must list the current released version."""
-    version = (ROOT / ".version").read_text().strip()
+def test_repo_changelog_documents_the_latest_published_release():
+    """CHANGELOG.md must document the latest *published* release (newest git tag).
+
+    We deliberately check the newest tag, not `.version`: during a release the
+    version is bumped before the changelog is stamped (stamping happens in the
+    commit step, after this test runs), so `.version` is briefly ahead of the
+    changelog. The newest tag is always the last published release and must be
+    present - that is the actual #201 staleness guard.
+    """
+    tag = subprocess.run(
+        ["git", "tag", "--sort=-v:refname"],
+        cwd=ROOT, capture_output=True, text=True,
+    ).stdout.splitlines()
+    tags = [t for t in tag if re.match(r"^v\d+\.\d+\.\d+$", t)]
+    if not tags:
+        import pytest
+        pytest.skip("no version tags in this checkout")
+    latest = tags[0].lstrip("v")
     body = CHANGELOG.read_text()
-    assert f"## [{version}]" in body, (
-        f"CHANGELOG.md does not document the current release {version} (#201)"
+    assert f"## [{latest}]" in body, (
+        f"CHANGELOG.md does not document the latest published release {latest} (#201)"
     )
+
+
+def test_repo_changelog_has_unreleased_section():
+    """An [Unreleased] section must always exist for new entries to accrue."""
+    assert "## [Unreleased]" in CHANGELOG.read_text(), "CHANGELOG.md is missing its [Unreleased] section"
